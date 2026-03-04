@@ -1,18 +1,19 @@
 """
-sentinel/core/ingest.py
+sentinel/core/ingest.py (v1.3 - Consolidated)
 -----------------------
-Ingests raw Invoice (JSON), PO (CSV), and POD (XML) files.
-Returns normalized, line-level records with source provenance
-(file path + line / element index) attached to every field.
+Core ingestion logic used by both the API and CLI modules.
+Provides high-fidelity line hinting for JSON, CSV and XML audit trails.
 """
 
 import json
 import csv
-import xml.etree.ElementTree as ET
+import logging
+import lxml.etree as ET
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
+logger = logging.getLogger(__name__)
 
 @dataclass
 class SourceRef:
@@ -32,8 +33,8 @@ class InvoiceLineItem:
     description: str
     quantity: float
     billed_unit_price: float
+    parent_sku: Optional[str] = None
     # provenance
-    src_invoice_id: SourceRef = field(default=None, repr=False)
     src_sku: SourceRef = field(default=None, repr=False)
     src_quantity: SourceRef = field(default=None, repr=False)
     src_billed_unit_price: SourceRef = field(default=None, repr=False)
@@ -67,53 +68,72 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
     if value is None or str(value).lower() == "null" or str(value).strip() == "":
         return default
     try:
-        # Handle decimal commas (e.g. 3,25 -> 3.25)
-        # Note: This is simplified; assumes comma is always a decimal if present 
-        # but only if there isn't also a dot, or handling it as the last separator.
-        s = str(value).strip()
-        if "," in s and "." not in s:
-            s = s.replace(",", ".")
-        elif "," in s and "." in s:
-            # Assume comma is thousands separator if dot exists
-            s = s.replace(",", "")
-            
+        s = str(value).strip().replace("$", "").replace(",", "")
         return float(s)
     except (ValueError, TypeError):
         return default
+
+
+def _find_json_line_simple(path: Path, sku: str) -> int | None:
+    """Finds the first occurrence of a SKU in the JSON file as a line hint."""
+    try:
+        if not path.exists(): return None
+        text = path.read_text(encoding="utf-8")
+        for i, line in enumerate(text.splitlines(), 1):
+            if f'"{sku}"' in line:
+                return i
+    except Exception:
+        pass
+    return None
 
 
 # ── loaders ──────────────────────────────────────────────────────────────────
 
 def load_invoices(path: str | Path) -> list[InvoiceLineItem]:
     path = Path(path)
-    raw = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        logger.error(f"Failed to parse JSON in {path}: {e}")
+        return []
+
     items: list[InvoiceLineItem] = []
+    if not isinstance(raw, list):
+        raw = [raw] if isinstance(raw, dict) else []
 
     for inv_idx, invoice in enumerate(raw):
-        inv_id = invoice.get("invoice_id", f"UNKNOWN-{inv_idx}")
-        vendor = invoice.get("vendor_name", "")
-        date = invoice.get("date", "")
+        if not isinstance(invoice, dict): continue
+        
+        inv_id = str(invoice.get("invoice_id") or invoice.get("Id") or "UNKNOWN")
+        vendor = str(invoice.get("vendor_name") or "UNKNOWN")
+        
+        line_items = invoice.get("line_items") or invoice.get("items")
+        if not isinstance(line_items, list):
+            if any(k in invoice for k in ["sku", "quantity", "billed_unit_price"]):
+                line_items = [invoice]
+            else:
+                line_items = []
 
-        for li_idx, li in enumerate(invoice.get("line_items", [])):
-            sku = str(li.get("sku", "")).strip()
-            # Estimate line number: JSON is hard to pin exactly; use record index
-            approx_line = None  # JSON doesn't have reliable line numbers
+        for li_idx, li in enumerate(line_items):
+            if not isinstance(li, dict): continue
+            
+            sku = str(li.get("sku") or li.get("item_reference") or "").strip()
+            line_no = _find_json_line_simple(path, sku)
 
-            def ref(f, inv_idx=inv_idx, li_idx=li_idx):
-                 return SourceRef(
+            def ref(f, line_no=line_no): 
+                return SourceRef(
                     file=str(path), record_index=inv_idx * 100 + li_idx,
-                    line_hint=approx_line, field=f
+                    line_hint=line_no, field=f
                 )
-                 
             items.append(InvoiceLineItem(
                 invoice_id=inv_id,
                 vendor_name=vendor,
-                date=date,
+                date=str(invoice.get("date") or ""),
                 sku=sku,
-                description=str(li.get("description", "")).strip(),
+                description=str(li.get("description") or "").strip(),
                 quantity=_safe_float(li.get("quantity", 0)),
                 billed_unit_price=_safe_float(li.get("billed_unit_price", 0)),
-                src_invoice_id=ref("invoice_id"),
+                parent_sku=li.get("parent_sku"),
                 src_sku=ref("sku"),
                 src_quantity=ref("quantity"),
                 src_billed_unit_price=ref("billed_unit_price"),
@@ -124,11 +144,12 @@ def load_invoices(path: str | Path) -> list[InvoiceLineItem]:
 def load_purchase_orders(path: str | Path) -> list[POLineItem]:
     path = Path(path)
     items: list[POLineItem] = []
+    if not path.exists(): return []
 
     with path.open(newline="", encoding="utf-8") as fh:
         reader = csv.DictReader(fh)
         for row_idx, row in enumerate(reader):
-            csv_line = row_idx + 2  # +1 header, +1 for 1-based
+            csv_line = row_idx + 2
             def ref(f, row_idx=row_idx, csv_line=csv_line):
                 return SourceRef(
                     file=str(path), record_index=row_idx,
@@ -149,33 +170,26 @@ def load_purchase_orders(path: str | Path) -> list[POLineItem]:
 
 def load_pod(path: str | Path) -> list[PODLineItem]:
     path = Path(path)
-    items: list[PODLineItem] = []
+    if not path.exists(): return []
     try:
-        tree = ET.parse(str(path))
+        parser = ET.XMLParser(recover=True)
+        tree = ET.parse(str(path), parser=parser)
     except Exception as e:
         logger.error(f"Malformed XML in {path}: {e}")
-        # Look for a recovery file if it exists (for dataset_04)
-        recovery_path = path.parent / (path.stem + "_recovered" + path.suffix)
-        if recovery_path.exists():
-            logger.info(f"Using recovery file: {recovery_path}")
-            try:
-                tree = ET.parse(str(recovery_path))
-            except:
-                return []
-        else:
-            return []
+        return []
 
-    root = tree.getroot()
+    items: list[PODLineItem] = []
     elem_idx = 0
-
-    for delivery in root.findall(".//delivery"):
+    
+    for delivery in tree.xpath("//delivery"):
         waybill = (delivery.get("waybill_ref") or delivery.get("waybill") or "UNKNOWN")
-        for item_elem in delivery.findall("item"):
-            def ref(f, elem_idx=elem_idx):
-                return SourceRef(
-                    file=str(path), record_index=elem_idx,
-                    line_hint=None, field=f  # ElementTree strips line info
-                )
+        for item_elem in delivery.xpath(".//item"):
+            line_no = getattr(item_elem, "sourceline", None)
+            
+            ref = lambda f, line_no=line_no: SourceRef(
+                file=str(path), record_index=elem_idx,
+                line_hint=line_no, field=f
+            )
             items.append(PODLineItem(
                 waybill_ref=waybill,
                 part_id=str(item_elem.get("part_id", "")).strip(),

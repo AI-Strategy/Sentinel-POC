@@ -56,6 +56,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     
     return DEMO_USER
 
-def verify_api_key(api_key: str = Depends(oauth2_scheme)):
+async def verify_api_key(api_key: str = Depends(oauth2_scheme)):
     """Legacy wrapper for dependency injection."""
-    return get_current_user(api_key)
+    return await get_current_user(api_key)

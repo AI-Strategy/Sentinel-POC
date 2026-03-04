@@ -1,7 +1,7 @@
 {
   "report_meta": {
     "title": "Sentinel Ghost Invoice Reconciliation Report",
-    "generated_at": "2026-03-04T22:19:20.905169+00:00",
+    "generated_at": "2026-03-04T22:35:28.166849+00:00",
     "total_invoice_lines": 2,
     "total_flags": 1,
     "total_financial_exposure_usd": 50.0

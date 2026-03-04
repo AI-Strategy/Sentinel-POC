@@ -80,6 +80,20 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
 
 # ── loaders ──────────────────────────────────────────────────────────────────
 
+def _find_json_line(path: Path, invoice_id: str, sku: str) -> int | None:
+    """Best-effort approximation of a line number in a JSON file."""
+    try:
+        text = path.read_text(encoding="utf-8")
+        lines = text.splitlines()
+        # Search for a line that likely marks this record
+        for i, line in enumerate(lines, 1):
+            if sku in line and invoice_id in text[max(0, text.find(line)-1000):text.find(line)+1000]:
+                return i
+    except Exception:
+        pass
+    return None
+
+
 def load_invoices(path: str | Path) -> list[InvoiceLineItem]:
     path = Path(path)
     try:
@@ -101,7 +115,6 @@ def load_invoices(path: str | Path) -> list[InvoiceLineItem]:
         
         line_items = invoice.get("line_items") or invoice.get("items")
         if not isinstance(line_items, list):
-            # Try to see if the whole object is a single line item
             if any(k in invoice for k in ["sku", "quantity", "billed_unit_price"]):
                 line_items = [invoice]
             else:
@@ -111,10 +124,15 @@ def load_invoices(path: str | Path) -> list[InvoiceLineItem]:
             if not isinstance(li, dict): continue
             
             sku = str(li.get("sku") or li.get("item_reference") or "").strip()
-            def ref(f): return SourceRef(
-                file=str(path), record_index=inv_idx * 100 + li_idx,
-                line_hint=None, field=f
-            )
+            
+            # Identify line hint for JSON
+            line_no = _find_json_line(path, inv_id, sku)
+
+            def ref(f, line_no=line_no): 
+                return SourceRef(
+                    file=str(path), record_index=inv_idx * 100 + li_idx,
+                    line_hint=line_no, field=f
+                )
             items.append(InvoiceLineItem(
                 invoice_id=inv_id,
                 vendor_name=vendor,
