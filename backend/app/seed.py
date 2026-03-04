@@ -1,5 +1,4 @@
 import os
-import json
 from .core.db import SessionLocal, engine, Base
 from .core.models import Invoice, PurchaseOrder, ProofOfDelivery
 from .core.ingest import Ingestor

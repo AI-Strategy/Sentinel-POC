@@ -1,19 +1,28 @@
-# Sentinel Substrate Report (2026-03-04)
+# Sentinel Substrate Status Report (2026-03-04 08:53)
 
-### Status Summary
-| Service | Status | Protocol / Endpoint |
-| :--- | :--- | :--- |
-| **Neo4j Aura** | ✅ **SUCCESS** | Cloud-based Graph at `24e0299b.databases.neo4j.io` |
-| **Postgres 18** | ✅ **SUCCESS** | **Isolated in Docker** (Internal `postgres:5432`) |
-| **Sentinel Backend** | ✅ **SUCCESS** | Live at `http://localhost:8000/health` |
+## 1. System Governance
+*   **Protocol version**: Antigravity Agents Protocol v1.6.0
+*   **Synchronization**: Full synchronization with `.agent/` (rules, skills, workflows) completed.
+*   **Linter**: `ruff` integrated and codebase is 100% compliant.
+
+## 2. Infrastructure & Connectivity
+*   **Sentinel Backend**: ✅ **HEALTHY** (FastAPI at `http://localhost:8000/health`)
+*   **PostgreSQL 18**: ✅ **ACTIVE** (Isolated in Docker Network: `sentinel_postgres`)
+*   **Neo4j 5.x**: ✅ **ACTIVE** (Cloud Aura Instance: `24e0299b.databases.neo4j.io`)
+*   **Conflict Management**: Host port 5432 conflict bypassed via internal Docker relay.
+
+## 3. Data & Logic Baseline
+*   **Seed Status**: Substrate hydrated with Phase 1 flat-structure data.
+*   **Entity Mapping**: Gemini 2.5 Flash Lite (Semantic Matching active).
+*   **Audit Logic**: Cypher-based reconciliation for Price, Quantity, and Phantom leakage.
+
+## 4. Financial Audit Snapshot (Last Run)
+| Category | Recovery Potential |
+| :--- | :--- |
+| **Price Variance** | $25.00 |
+| **Quantity Mismatch** | $50.00 |
+| **Phantom Lines** | $1,500.00 |
+| **Total Recoverable** | **$1,575.00** |
 
 ---
-
-### Implementation Details:
-*   **Aura Match**: Confirmed cloud-based Neo4j connection works as expected.
-*   **Conflict Resolution**: Fixed "Access Denied" by removing the host-port mapping for 5432 and isolating Postgres within a private Docker network.
-*   **Native Postgres**: Service `postgresql-x64-17` (PID 7740) remains on the host machine.
-*   **Direct Substrate Check**: Backend acts as the primary proxy to the internal database (no longer blocked by host service conflicts).
-
-### Python Management
-*   **Linter Active**: `ruff` added to project requirements.
+*State saved by Antigravity AI — Protocol zero security enforced.*

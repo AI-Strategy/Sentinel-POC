@@ -1,0 +1,35 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/main.tsx",
+    "src/index.tsx",
+    "vite.config.ts",
+    "tailwind.config.js",
+    "postcss.config.js"
+  ],
+  "project": ["src/**/*.{ts,tsx,js,jsx}"],
+  "ignore": [
+    "**/*.d.ts",
+    "**/__tests__/**",
+    "**/*.test.{ts,tsx}",
+    "**/*.spec.{ts,tsx}",
+    "bin/**",
+    "scripts/**",
+    "public/**",
+    "docker-compose*.yml"
+  ],
+  "ignoreDependencies": [
+    "lucide-react", 
+    "clsx", 
+    "tailwind-merge"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignoreBinaries": ["docker", "docker-compose"],
+  "rules": {
+    "files": "warn",
+    "dependencies": "warn",
+    "unlisted": "error",
+    "exports": "warn",
+    "types": "warn"
+  }
+}

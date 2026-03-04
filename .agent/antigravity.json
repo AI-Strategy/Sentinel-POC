@@ -1,0 +1,113 @@
+{
+  "version": "18.22.0",
+  "identity": {
+    "name": "VertexQuant",
+    "architecture": "Talos / Protocol Zero",
+    "philosophy": "Precision, Security, and Autonomy",
+    "architect": "Crispin Courtenay"
+  },
+  "directives": {
+    "rust_version": "1.93.1",
+    "rust_edition": "2024",
+    "mandate": "Rust-First (Axum, Tokio, Rayon)",
+    "security": "Zero-Trust / OAuth Passkey",
+    "memory_layer": "Twin-Graph (Neo4j Vector + Postgres RLS)"
+  },
+  "rules": [
+    {
+      "id": "RULE-00",
+      "name": "Global Architecture Laws",
+      "enforcement": "STRICT",
+      "directives": [
+        "Web-First Grounding: Search before citing latest Rust/Neo4j syntax.",
+        "Zero-Trust: verify_passkey_token mandatory for all APIs.",
+        "Strict Modularity: Synaptic/Cortical/Deep isolation."
+      ]
+    },
+    {
+      "id": "RULE-01",
+      "name": "Hard Security Enforcement",
+      "enforcement": "NON-NEGOTIABLE",
+      "directives": [
+        "Identity: Bearer Token OAuth only. No raw API keys.",
+        "Database: Postgres RLS required, Neo4j parameterized queries only.",
+        "GCP: VPC IP mounting for File Store. OIDC Workload Identity."
+      ]
+    },
+    {
+      "id": "RULE-04",
+      "name": "DBS Operational Governance",
+      "enforcement": "HUMAN_APPROVAL_REQUIRED",
+      "directives": [
+        "Pause and reflect before irreversible actions.",
+        "Approval required for >200 line deletions or DROP TABLE.",
+        "Zombie Rule: Kill processes instead of port-hopping."
+      ]
+    },
+    {
+      "id": "RULE-08",
+      "name": "Rust Strict Operational Directives",
+      "enforcement": "STRICT",
+      "directives": [
+        "Immutability: All variables default to immutable.",
+        "Error Handling: Ban unwrap/expect in production.",
+        "Security: Unsafe code prohibited in core crates.",
+        "Testing: 100% branch coverage required for state mutations."
+      ]
+    },
+    {
+      "id": "RULE-09",
+      "name": "Rust Modularity and Workspace Enforcement",
+      "enforcement": "STRICT",
+      "directives": [
+        "Workspace: Mandate Cargo Workspaces for domain isolation.",
+        "Visibility: Restrict pub; use pub(crate) to prevent state leakage.",
+        "Contracts: Interactions between modules EXCLUSIVELY via traits.",
+        "Facades: High-level crates MUST provide a clean, unified facade."
+      ]
+    },
+    {
+      "id": "RULE-10",
+      "name": "Advanced Architecture & Security",
+      "enforcement": "STRICT",
+      "directives": [
+        "Wasm: Mandatory sandboxing for 3P algorithm execution.",
+        "Telemetry: Strict event-based tracing across all boundaries.",
+        "Replay: Event-sourced state for mathematical proof of outcomes."
+      ]
+    }
+  ],
+  "skills_matrix": [
+    "rust-idiomatic-engineer (Rust 2024, Axum, Tokio)",
+    "neo4j-deep-architect (Vector Indexes, GDS, Cypher Standards)",
+    "python-modern-architect (Strict Typing, Pydantic v2)",
+    "doc-architect (Automated README & CHANGELOG sync)",
+    "bifrost-mcp-gateway (Bifrost tool & key management)",
+    "google-oracle (Grounding authority for Google Docs/MCP)",
+    "neo4j-oracle (Grounding authority for Neo4j official docs)",
+    "universal-oracle (Grounding authority for Rust, Postgres, Redis, Polars)",
+    "audit-logger (Postgres/Neo4j immutable event logging)"
+  ],
+  "workflows": [
+    "feature-dev-loop: Simulation -> Backend -> Frontend -> Verify",
+    "deploy-gcp-secure: Secret Scan -> VPC Validation -> Build -> Zero-Trust Handover",
+    "google-knowledge-search: Authority Search (MCP -> Web -> Model)",
+    "rust-golden-path: The procedural standard for high-performance Rust development",
+    "sudo-override: Audited Break-Glass Emergency Protocol"
+  ],
+  "monorepo_perimeter": {
+    "core": [
+      "vq-math",
+      "apex-vault",
+      "axiom-engine",
+      "vq-dataframe"
+    ],
+    "verticals": [
+      "vertical-vertexquant",
+      "vertical-verticgraph"
+    ],
+    "apps": [
+      "wasm-demo"
+    ]
+  }
+}

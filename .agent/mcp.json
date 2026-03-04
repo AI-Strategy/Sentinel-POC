@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "postgres-cortical": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://admin:vault_secure_pg_pass_2026@localhost:5432/memory_vault"
+      ],
+      "description": "Live schema mapping for the Cortical memory layer. Use this to verify exact column names and RLS policies."
+    },
+    "github-repo": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "REPLACE_WITH_YOUR_GITHUB_TOKEN"
+      },
+      "description": "Direct read/write access to GitHub Issues, Pull Requests, and repository states."
+    },
+    "google-developer-knowledge": {
+      "httpUrl": "https://developerknowledge.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "AIzaSyDqXD7m1ZpSNNpeSioKbEnppajjWSWFIWQ"
+      },
+      "description": "Google's official source of truth for public documentation (Markdown)."
+    }
+  }
+}

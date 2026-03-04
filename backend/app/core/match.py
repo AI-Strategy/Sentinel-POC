@@ -30,9 +30,9 @@ class EntityMapper:
             Example: {{"SKU-123-BLK": "WIDGET_A", "REF_WIDGET_A": "WIDGET_A"}}
             """
 
-            # Using gemini-2.0-flash (most stable current version of Flash)
+            # Using gemini-2.5-flash-lite (as per substrate availability)
             response = self.client.models.generate_content(
-                model='gemini-2.0-flash',
+                model='gemini-2.5-flash-lite',
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
@@ -46,7 +46,10 @@ class EntityMapper:
             logger.error(f"Entity matching failed: {e}")
             # Fallback to identity mapping if LLM fails
             fallback = {}
-            for s in skus: fallback[s] = s
-            for p in item_refs: fallback[p] = p
-            for pt in part_ids: fallback[pt] = pt
+            for s in skus:
+                fallback[s] = s
+            for p in item_refs:
+                fallback[p] = p
+            for pt in part_ids:
+                fallback[pt] = pt
             return fallback

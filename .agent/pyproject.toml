@@ -1,0 +1,18 @@
+[tool.vulture]
+min_confidence = 80  # Only report High Confidence dead code
+paths = ["src", "bin", "scripts"]
+exclude = [
+    "tests/",
+    "docs/",
+    ".venv/",
+    "migrations/",  # Database migrations often look unused
+    "conftest.py"   # Pytest configuration
+]
+sort_by_size = true
+verbose = false
+ignore_names = [
+    "model_config",  # Pydantic v2 specific
+    "Config",        # Pydantic v1 specific
+    "__main__",
+    "lifespan"       # FastAPI lifespan handler
+]
