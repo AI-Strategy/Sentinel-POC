@@ -663,6 +663,15 @@ async def get_latest_markdown():
     return PlainTextResponse(p.read_text())
 
 
+@app.get("/report/latest/pdf", dependencies=[Depends(verify_api_key)])
+async def get_latest_pdf():
+    from fastapi.responses import FileResponse
+    p = OUTPUT_DIR / "sentinel_report.pdf"
+    if not p.exists():
+        raise HTTPException(404, "No PDF report yet. Ensure fpdf2 is installed and the report was generated.")
+    return FileResponse(p, media_type="application/pdf", filename="sentinel_evidence_package.pdf")
+
+
 @app.post("/graph/update-po", summary="Phase 2: Round-Trip Update Propagation", dependencies=[Depends(verify_api_key)])
 async def update_po_price(req: POUpdateRequest):
     """
@@ -706,9 +715,13 @@ def parse_args():
     p.add_argument("--po",         default="data/purchase_orders.csv",   help="Path to PO CSV (if single run)")
     p.add_argument("--pod",        default="data/proof_of_delivery.xml", help="Path to POD XML (if single run)")
     p.add_argument("--no-llm",     action="store_true",                  help="Disable LLM matching")
+    p.add_argument("--persist-neo4j", action="store_true",               help="Store results in Neo4j")
+    p.add_argument("--neo4j-uri",  default="bolt://localhost:7687",      help="Neo4j URI")
+    p.add_argument("--neo4j-user", default="neo4j",                      help="Neo4j User")
+    p.add_argument("--neo4j-pass", default="sentinel_neo4j",              help="Neo4j Pass")
     return p.parse_args()
 
-def process_dataset(invoice_path, po_path, pod_path, output_dir, output_prefix, use_llm):
+def process_dataset(invoice_path, po_path, pod_path, output_dir, output_prefix, use_llm, persist_neo=False, uri=None, user=None, pw=None):
     # Using relative imports since we are in the sentinel package
     from .core.ingest import load_invoices, load_purchase_orders, load_pod
     from .core.match import link_transactions
@@ -722,12 +735,26 @@ def process_dataset(invoice_path, po_path, pod_path, output_dir, output_prefix, 
     transactions = link_transactions(invoices, pos, pods, use_llm=use_llm)
     flags = detect_ghosts(transactions)
     
-    # Write JSON directly conforming to grading harness naming
-    json_report = build_json_report(flags, transactions)
-    out_path = Path(output_dir) / f"{output_prefix}.reconciliation_report.json"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(json_report, indent=2), encoding="utf-8")
-    logger.info("Generated %s", out_path.name)
+    # Write reports (JSON, Markdown, PDF)
+    from .core.report import write_reports
+    json_path, md_path = write_reports(flags, transactions, output_dir=output_dir)
+    
+    # Rename to conform to prefix if needed, or better yet, just use write_reports with prefixes
+    # But for now, let's just make sure we satisfy the grading harness move
+    import shutil
+    final_json = Path(output_dir) / f"{output_prefix}.reconciliation_report.json"
+    shutil.move(str(json_path), str(final_json))
+    
+    if (Path(output_dir) / "sentinel_report.md").exists():
+        shutil.move(str(Path(output_dir) / "sentinel_report.md"), str(Path(output_dir) / f"{output_prefix}.report.md"))
+    if (Path(output_dir) / "sentinel_report.pdf").exists():
+        shutil.move(str(Path(output_dir) / "sentinel_report.pdf"), str(Path(output_dir) / f"{output_prefix}.report.pdf"))
+
+    logger.info("Generated reports for %s", output_prefix)
+
+    if persist_neo:
+        from .core.graph import persist_to_neo4j
+        persist_to_neo4j(transactions, flags, uri=uri, user=user, password=pw)
 
 def main():
     args = parse_args()
@@ -747,13 +774,19 @@ def main():
                     pod_path=dataset_dir / "proof_of_delivery.xml",
                     output_dir=args.reports,
                     output_prefix=dataset_dir.name,
-                    use_llm=not args.no_llm
+                    use_llm=not args.no_llm,
+                    persist_neo=args.persist_neo4j,
+                    uri=args.neo4j_uri,
+                    user=args.neo4j_user,
+                    pw=args.neo4j_pass
                 )
             except Exception as e:
                 logger.error("Failed to process %s: %s", dataset_dir.name, e)
     else:
         logger.info("Running single dataset mode...")
-        process_dataset(args.invoice, args.po, args.pod, args.reports, "sentinel", not args.no_llm)
+        process_dataset(args.invoice, args.po, args.pod, args.reports, "sentinel", 
+                        not args.no_llm, args.persist_neo4j, args.neo4j_uri, 
+                        args.neo4j_user, args.neo4j_pass)
 
     logger.info("✅ Sentinel batch run complete.")
     return 0

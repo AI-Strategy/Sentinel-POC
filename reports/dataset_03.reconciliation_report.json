@@ -1,0 +1,50 @@
+{
+  "report_meta": {
+    "title": "Sentinel Ghost Invoice Reconciliation Report",
+    "generated_at": "2026-03-04T22:02:06.752151+00:00",
+    "total_invoice_lines": 2,
+    "total_flags": 1,
+    "total_financial_exposure_usd": 50.0,
+    "total_recoverable_amount_usd": 50.0,
+    "flags_by_type": {
+      "PRICE_VARIANCE": 0,
+      "QTY_MISMATCH": 0,
+      "PHANTOM_LINE": 1
+    }
+  },
+  "flags": [
+    {
+      "flag_id": "PHANTOM_LINE::INV-SCAF-01::SKU-CHILD-01",
+      "ghost_type": "PHANTOM_LINE",
+      "severity": "HIGH",
+      "invoice_id": "INV-SCAF-01",
+      "sku": "SKU-CHILD-01",
+      "description": "Child Component",
+      "invoiced_value": 5.0,
+      "expected_value": 0.0,
+      "delta": 0.0,
+      "financial_impact_usd": 50.0,
+      "narrative": "SKU 'SKU-CHILD-01' (Child Component) appears on invoice INV-SCAF-01 but has NO matching Purchase Order and NO Proof of Delivery. Full billed amount $50.00 is unsubstantiated.",
+      "evidence_chain": [
+        {
+          "file": "invoices.json",
+          "field": "sku",
+          "record_index": 0,
+          "line_number": -1
+        },
+        {
+          "file": "invoices.json",
+          "field": "billed_unit_price",
+          "record_index": 0,
+          "line_number": -1
+        },
+        {
+          "file": "invoices.json",
+          "field": "quantity",
+          "record_index": 0,
+          "line_number": -1
+        }
+      ]
+    }
+  ]
+}

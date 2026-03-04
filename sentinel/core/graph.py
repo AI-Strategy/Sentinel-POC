@@ -295,6 +295,14 @@ def persist_to_neo4j(
     driver = _make_driver(uri, user, password)
     try:
         with driver.session() as session:
+            # Ensure indexes exist for batch performance
+            session.run("CREATE INDEX invoice_id_idx IF NOT EXISTS FOR (i:Invoice) ON (i.invoice_id)")
+            session.run("CREATE INDEX line_id_idx IF NOT EXISTS FOR (l:InvoiceLine) ON (l.line_id)")
+            session.run("CREATE INDEX po_id_idx IF NOT EXISTS FOR (p:POLine) ON (p.po_id, p.item_reference)")
+            session.run("CREATE INDEX pod_ref_idx IF NOT EXISTS FOR (d:PODLine) ON (d.waybill_ref, d.part_id)")
+            session.run("CREATE INDEX flag_id_idx IF NOT EXISTS FOR (g:GhostFlag) ON (g.flag_id)")
+            session.run("CREATE INDEX src_id_idx IF NOT EXISTS FOR (s:SourceDocument) ON (s.src_id)")
+
             session.execute_write(_merge_invoice_nodes, transactions)
             session.execute_write(_merge_po_nodes, transactions)
             session.execute_write(_merge_pod_nodes, transactions)

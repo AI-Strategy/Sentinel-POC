@@ -23,6 +23,11 @@ pdf2image>=1.17.0                  # PDF → image (multimodal fallback)
 requests>=2.31.0                   # REST calls
 simple-salesforce>=1.12.5          # Salesforce API
 
+# ── Specialized Logic & Search ──────────────────────────────────────────────────
+rapidfuzz                          # High-performance fuzzy matching (Required for 10k+ rows)
+psutil                             # Performance benchmarking (memory/cpu audit)
+fpdf2                              # Automated PDF report generation (Evidence Packages)
+
 # ── Testing & Validation ───────────────────────────────────────────────────────
 pytest==9.0.2                      # High-performance testing framework
 httpx==0.28.1                       # Async HTTP client for integration tests

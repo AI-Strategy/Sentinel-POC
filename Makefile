@@ -40,7 +40,10 @@ serve: ## Run FastAPI server in development mode (native)
 	$(VENV_BIN)/fastapi dev sentinel/main.py
 
 run-batch: ## Execute configuration-driven reconciliation across all dirty datasets
-	$(VENV_BIN)/$(PYTHON) sentinel/main.py --batch-dir $(BATCH_DATA) --reports $(REPORTS_DIR)
+	$(VENV_BIN)/$(PYTHON) -m sentinel.main --batch-dir $(BATCH_DATA) --reports $(REPORTS_DIR)
+
+persist-graph: ## Execute batch reconciliation and persist results to Neo4j
+	$(VENV_BIN)/$(PYTHON) -m sentinel.main --batch-dir $(BATCH_DATA) --reports $(REPORTS_DIR) --persist-neo4j
 
 propagate-demo: ## Demonstrate Phase 2 Milestone 3: Round-Trip Update Propagation
 	@echo "Propagating price update for PO-2024-001..."

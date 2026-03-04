@@ -642,6 +642,15 @@ async def get_latest_report_md():
     return PlainTextResponse(p.read_text())
 
 
+@app.get("/report/latest/pdf", dependencies=[Depends(verify_api_key)], summary="Return latest reconciliation result (Forensic PDF)")
+async def get_latest_report_pdf():
+    from fastapi.responses import FileResponse
+    p = OUTPUT_DIR / "sentinel_report.pdf"
+    if not p.exists():
+        raise HTTPException(404, "No PDF report yet. Ensure fpdf2 is installed.")
+    return FileResponse(p, media_type="application/pdf", filename="sentinel_evidence_package.pdf")
+
+
 @app.post("/graph/update-po", summary="Phase 2: Round-Trip Update Propagation", dependencies=[Depends(verify_api_key)])
 async def update_po_price(req: POUpdateRequest):
     from neo4j import GraphDatabase

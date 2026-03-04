@@ -24,3 +24,4 @@ pdf2image>=1.17.0                  # PDF → image (multimodal fallback)
 # ── Specialized Logic & Search ──────────────────────────────────────────────────
 rapidfuzz                          # High-performance fuzzy matching (Required for 10k+ rows)
 psutil                             # Performance benchmarking (memory/cpu audit)
+fpdf2                              # Automated PDF report generation (Evidence Packages)
