@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+neo4j
+python-dotenv
+pydantic
+pydantic-settings
+httpx
+python-multipart
+# Database
+sqlalchemy
+psycopg2-binary
+alembic
+ruff
+google-genai

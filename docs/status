@@ -1,0 +1,19 @@
+# Sentinel Substrate Report (2026-03-04)
+
+### Status Summary
+| Service | Status | Protocol / Endpoint |
+| :--- | :--- | :--- |
+| **Neo4j Aura** | ✅ **SUCCESS** | Cloud-based Graph at `24e0299b.databases.neo4j.io` |
+| **Postgres 18** | ✅ **SUCCESS** | **Isolated in Docker** (Internal `postgres:5432`) |
+| **Sentinel Backend** | ✅ **SUCCESS** | Live at `http://localhost:8000/health` |
+
+---
+
+### Implementation Details:
+*   **Aura Match**: Confirmed cloud-based Neo4j connection works as expected.
+*   **Conflict Resolution**: Fixed "Access Denied" by removing the host-port mapping for 5432 and isolating Postgres within a private Docker network.
+*   **Native Postgres**: Service `postgresql-x64-17` (PID 7740) remains on the host machine.
+*   **Direct Substrate Check**: Backend acts as the primary proxy to the internal database (no longer blocked by host service conflicts).
+
+### Python Management
+*   **Linter Active**: `ruff` added to project requirements.
