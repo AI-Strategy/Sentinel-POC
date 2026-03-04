@@ -1,24 +1,10 @@
 ﻿"""
-sentinel/core/llm.py
+sentinel/core/llm.py (v1.5)
 --------------------
 Unified LLM client backed by the modern Google Gemini SDK (google-genai).
+Supports Native PDF/Vision processing and Structured Outputs (JSON Schema).
 
 Replaces legacy google-generativeai calls throughout Sentinel.
-Exposes two interfaces:
-
-  GeminiClient.complete(prompt)         â†’ str
-  GeminiClient.complete_vision(prompt, images)  â†’ str   (base64 image list)
-
-Both return raw text. JSON callers must parse themselves.
-
-Model routing:
-  Text tasks  â†’ gemini-1.5-flash          (fast, cheap)
-  Vision tasks â†’ gemini-1.5-flash          (native multimodal)
-
-Configuration (env vars or explicit):
-  GEMINI_API_KEY   â€” required
-  GEMINI_TEXT_MODEL  â€” default: gemini-1.5-flash
-  GEMINI_VISION_MODEL â€” default: gemini-1.5-flash
 """
 
 from __future__ import annotations
@@ -28,22 +14,23 @@ import json
 import logging
 import os
 import re
-from typing import Any
+from typing import Any, Optional, Type, Union
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
-# â”€â”€ Defaults â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Defaults ──────────────────────────────────────────────────────────────────
 
-DEFAULT_TEXT_MODEL   = "gemini-1.5-flash"
-DEFAULT_VISION_MODEL = "gemini-1.5-flash"
+DEFAULT_TEXT_MODEL   = "gemini-2.0-flash"
+DEFAULT_VISION_MODEL = "gemini-2.0-flash"
 
 
-# â”€â”€ Client â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Client ───────────────────────────────────────────────────────────────────
 
 class GeminiClient:
     """
     Thin wrapper around the google-genai SDK.
-    Eliminates reliance on deprecated google-generativeai.
+    Supports native bytes (PDF/Images) and Structured Response schemas.
     """
 
     def __init__(
@@ -62,134 +49,109 @@ class GeminiClient:
     def _init(self):
         try:
             from google import genai
-            if not self.api_key:
-                logger.warning("GEMINI_API_KEY not set â€” LLM features disabled.")
-                return
+            # Check for Vertex AI environment variables
+            use_vertex = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "").lower() == "true"
             
-            # Use the new Client constructor
-            self._client    = genai.Client(api_key=self.api_key)
+            if use_vertex:
+                project = os.environ.get("GOOGLE_CLOUD_PROJECT")
+                location = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
+                self._client = genai.Client(vertexai=True, project=project, location=location)
+                logger.info("Gemini initialized via Vertex AI (project=%s, location=%s)", project, location)
+            else:
+                if not self.api_key:
+                    logger.warning("GEMINI_API_KEY not set — LLM features disabled.")
+                    return
+                self._client = genai.Client(api_key=self.api_key)
+            
             self._genai_pkg = genai
             self._available = True
-            logger.info("Gemini (google-genai) client initialised (text=%s, vision=%s)",
-                        self.text_model, self.vision_model)
         except ImportError:
-            logger.warning(
-                "google-genai not installed. "
-                "Run: pip install google-genai"
-            )
+            logger.warning("google-genai not installed. Run: pip install google-genai")
 
     @property
     def available(self) -> bool:
         return self._available
 
-    # â”€â”€ Text completion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
     def complete(
         self,
-        prompt: str,
-        max_tokens: int = 2048,
+        prompt: Union[str, list[Any]],
+        max_tokens: int = 4096,
         temperature: float = 0.1,
-    ) -> str:
-        """Send a text prompt, return raw response string."""
+        response_schema: Optional[Type[BaseModel]] = None,
+    ) -> Any:
+        """
+        Generates content. Supports multimodal 'contents' list and structured output.
+        If response_schema is provided, returns the parsed model instance/dict.
+        """
         if not self._available:
-            raise RuntimeError("Gemini client not available (check GEMINI_API_KEY and install google-genai)")
+            raise RuntimeError("Gemini client not available.")
         
         from google.genai import types
+        
+        config_kwargs = {
+            "max_output_tokens": max_tokens,
+            "temperature": temperature,
+        }
+        
+        if response_schema:
+            config_kwargs["response_mime_type"] = "application/json"
+            config_kwargs["response_schema"] = response_schema
+
         try:
             response = self._client.models.generate_content(
                 model=self.text_model,
                 contents=prompt,
-                config=types.GenerateContentConfig(
-                    max_output_tokens=max_tokens,
-                    temperature=temperature,
-                ),
+                config=types.GenerateContentConfig(**config_kwargs),
             )
+            
+            if response_schema:
+                # If it's structured output, google-genai returns the parsed data in response.parsed
+                # or we can manually parse response.text if using older SDK versions
+                if hasattr(response, "parsed") and response.parsed:
+                    return response.parsed
+                return json.loads(response.text)
+            
             return response.text.strip()
         except Exception as exc:
-            logger.error("Gemini complete() failed: %s", exc)
+            logger.error("Gemini model.generate_content failed: %s", exc)
             raise
-
-    # â”€â”€ Vision completion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-    def complete_vision(
-        self,
-        prompt: str,
-        images: list[dict],           # [{"data": base64str, "mime_type": "image/png"}, ...]
-        max_tokens: int = 2048,
-        temperature: float = 0.1,
-    ) -> str:
-        """Send a multimodal prompt with images, return raw response string."""
-        if not self._available:
-            raise RuntimeError("Gemini client not available")
-            
-        from google.genai import types
-        try:
-            import PIL.Image
-            import io as _io
-
-            # Construct multimodal parts
-            contents: list[Any] = []
-            for img in images:
-                raw_bytes = base64.b64decode(img["data"])
-                pil_img   = PIL.Image.open(_io.BytesIO(raw_bytes))
-                contents.append(pil_img)
-            
-            # The prompt is also part of the contents
-            contents.append(prompt)
-
-            response = self._client.models.generate_content(
-                model=self.vision_model,
-                contents=contents,
-                config=types.GenerateContentConfig(
-                    max_output_tokens=max_tokens,
-                    temperature=temperature,
-                ),
-            )
-            return response.text.strip()
-        except ImportError:
-            raise RuntimeError("Pillow not installed: pip install Pillow")
-        except Exception as exc:
-            logger.error("Gemini complete_vision() failed: %s", exc)
-            raise
-
-    # â”€â”€ JSON helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def complete_json(
         self,
         prompt: str,
-        max_tokens: int = 4096,
         images: list[dict] | None = None,
-    ) -> dict | list:
+        max_tokens: int = 4096,
+        response_schema: Optional[Type[BaseModel]] = None,
+    ) -> Any:
         """
-        Send a prompt that expects a JSON response.
-        Strips markdown fences and parses automatically.
-        Raises ValueError if parsing fails.
+        Legacy-compatible wrapper for JSON tasks. 
+        Now supports direct structured output via Pydantic.
         """
-        raw = (
-            self.complete_vision(prompt, images, max_tokens=max_tokens)
-            if images
-            else self.complete(prompt, max_tokens=max_tokens)
-        )
-        cleaned = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.MULTILINE)
-        cleaned = re.sub(r"\s*```$", "", cleaned, flags=re.MULTILINE).strip()
-        try:
-            return json.loads(cleaned)
-        except json.JSONDecodeError as exc:
-            logger.error("Gemini JSON parse failed.\nRaw:\n%s\nError: %s", raw[:500], exc)
-            raise ValueError(f"Gemini returned non-JSON: {exc}") from exc
+        contents = [prompt]
+        if images:
+            from google.genai import types
+            for img in images:
+                # Transform legacy internal format to google-genai types.Part
+                if "data" in img:
+                    contents.append(
+                        types.Part.from_bytes(
+                            data=base64.b64decode(img["data"]),
+                            mime_type=img.get("mime_type", "image/png")
+                        )
+                    )
+        
+        return self.complete(contents, max_tokens=max_tokens, response_schema=response_schema)
 
 
-# â”€â”€ Module-level singleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Module-level singleton ────────────────────────────────────────────────────
 
 _DEFAULT_CLIENT: GeminiClient | None = None
-
 
 def get_client(
     api_key: str | None = None,
     text_model: str = DEFAULT_TEXT_MODEL,
     vision_model: str = DEFAULT_VISION_MODEL,
 ) -> GeminiClient:
-    """Return (or create) the module-level default Gemini client."""
     global _DEFAULT_CLIENT
     if _DEFAULT_CLIENT is None or api_key:
         _DEFAULT_CLIENT = GeminiClient(
