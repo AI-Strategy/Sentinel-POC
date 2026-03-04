@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@tailwindcss/postcss": "^4.2.1",
+    "@vitejs/plugin-basic-ssl": "^2.1.4",
     "framer-motion": "^12.34.5",
     "lucide-react": "^0.576.0",
     "react": "^19.2.0",

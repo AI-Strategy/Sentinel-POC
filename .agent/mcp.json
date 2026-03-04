@@ -1,1 +1,31 @@
-
+{
+  "mcpServers": {
+    "postgres-cortical": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "env:POSTGRES_CORTICAL_URL"
+      ],
+      "description": "Live schema mapping for the Cortical memory layer. [REDACTED: Secrets moved to .env]"
+    },
+    "github-repo": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "env:GITHUB_PERSONAL_ACCESS_TOKEN"
+      },
+      "description": "Direct read/write access to GitHub Issues. [REDACTED: Secrets moved to .env]"
+    },
+    "google-developer-knowledge": {
+      "httpUrl": "https://developerknowledge.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "env:GOOGLE_DEVELOPER_KNOWLEDGE_KEY"
+      },
+      "description": "Google's official source of truth. [REDACTED: Secrets moved to .env]"
+    }
+  }
+}

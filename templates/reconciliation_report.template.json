@@ -1,0 +1,37 @@
+{
+    "report_meta": {
+        "title": "Sentinel Ghost Invoice Reconciliation Report",
+        "generated_at": "2026-03-04T00:00:00Z",
+        "total_invoice_lines": 0,
+        "total_flags": 0,
+        "total_financial_exposure_usd": 0.0,
+        "flags_by_type": {
+            "PRICE_VARIANCE": 0,
+            "QTY_MISMATCH": 0,
+            "PHANTOM_LINE": 0
+        }
+    },
+    "flags": [
+        {
+            "flag_id": "TYPE::INV_ID::SKU",
+            "ghost_type": "PRICE_VARIANCE | QTY_MISMATCH | PHANTOM_LINE",
+            "severity": "HIGH | MEDIUM | LOW",
+            "invoice_id": "INV-XXXX",
+            "sku": "SKU-XXXX",
+            "description": "Item description",
+            "invoiced_value": 0.0,
+            "expected_value": 0.0,
+            "delta": 0.0,
+            "financial_impact_usd": 0.0,
+            "narrative": "Detailed explanation of the discrepancy.",
+            "evidence_chain": [
+                {
+                    "file": "filename.ext",
+                    "field": "field_name",
+                    "record_index": 0,
+                    "line_number": 0
+                }
+            ]
+        }
+    ]
+}

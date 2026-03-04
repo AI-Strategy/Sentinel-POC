@@ -1,0 +1,22 @@
+[
+  {
+    "invoice_id": "INV-SCAF-01",
+    "vendor_name": "SCAFFOLD VENDOR",
+    "date": "2024-03-04",
+    "line_items": [
+      {
+        "sku": "SKU-CHILD-01",
+        "description": "Child Component",
+        "quantity": 10,
+        "billed_unit_price": 5.0,
+        "parent_sku": "SKU-PARENT-01"
+      },
+      {
+        "sku": "SKU-PARENT-01",
+        "description": "Parent Assembly",
+        "quantity": 1,
+        "billed_unit_price": 100.0
+      }
+    ]
+  }
+]

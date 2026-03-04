@@ -1,0 +1,45 @@
+# .github/workflows/ci.yml
+name: Sentinel POC CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup Python Runtime
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Testing Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest==9.0.2 httpx==0.28.1
+
+      - name: Initialize Orchestrated Environment
+        env:
+          # The API key must be stored in GitHub Actions Secrets
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          # The --wait flag blocks execution until the Neo4j health check passes
+          docker compose up --build --wait
+
+      - name: Execute Pytest Integration Suite
+        run: |
+          pytest tests/test_api.py
+
+      - name: Environment Teardown
+        if: always()
+        run: |
+          chmod +x teardown.sh
+          ./teardown.sh

@@ -1,0 +1,4 @@
+PO_id,item_reference,agreed_unit_price,qty_authorized,status,currency
+PO-TEST-01,SKU-GOOD-01,10.0,10,OPEN,USD
+PO-TEST-01,SKU-PRICE-01,100.0,5,OPEN,USD
+PO-TEST-01,SKU-QTY-01,1.0,100,OPEN,USD

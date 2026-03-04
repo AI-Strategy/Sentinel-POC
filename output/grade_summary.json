@@ -1,0 +1,35 @@
+{
+  "dataset_01": {
+    "precision": 0,
+    "recall": 0.0,
+    "f1": 0,
+    "evidence_accuracy": 1.0,
+    "impact_variance": 0.0
+  },
+  "dataset_02": {
+    "precision": 0,
+    "recall": 0.0,
+    "f1": 0,
+    "evidence_accuracy": 1.0,
+    "impact_variance": 0.0
+  },
+  "dataset_03": {
+    "precision": 0,
+    "recall": 0.0,
+    "f1": 0,
+    "evidence_accuracy": 1.0,
+    "impact_variance": 0.0
+  },
+  "dataset_04": {
+    "precision": 0,
+    "recall": 0.0,
+    "f1": 0,
+    "evidence_accuracy": 1.0,
+    "impact_variance": 0.0
+  },
+  "dataset_05_scale_10k": {
+    "scale_accuracy": 0,
+    "f1": 0,
+    "notes": "Dataset 05 uses approximate count scoring."
+  }
+}

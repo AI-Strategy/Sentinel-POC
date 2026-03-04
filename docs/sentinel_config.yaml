@@ -1,0 +1,27 @@
+# Sentinel Liquid OS Configuration
+pipeline:
+  version: "1.1"
+  llm_model: "gemini-2.5-flash"
+  batch_size: 20
+
+reconciliation:
+  price_tolerance_pct: 0.01
+  qty_tolerance: 0
+  severities:
+    price:
+      high: 0.10
+      medium: 0.02
+    qty_impact_usd:
+      high: 500
+      medium: 100
+
+graph_schema:
+  recursive_mode: true
+  enforce_multi_tenancy: true
+  
+prompts:
+  matching_logic: |
+    You are a procurement data-matching assistant.
+    Map the following disparate inventory identifiers to a single canonical ID.
+    Items: {items}
+    Return ONLY a JSON dictionary of mappings.

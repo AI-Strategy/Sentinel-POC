@@ -1,0 +1,33 @@
+[
+    {
+        "invoice_id": "INV-TEST-01",
+        "vendor_name": "TEST VENDOR CORP",
+        "date": "2024-03-05",
+        "line_items": [
+            {
+                "sku": "SKU-GOOD-01",
+                "description": "Standard Widget",
+                "quantity": 10,
+                "billed_unit_price": 10.0
+            },
+            {
+                "sku": "SKU-PHANTOM-01",
+                "description": "Unexpected Maintenance",
+                "quantity": 1,
+                "billed_unit_price": 500.0
+            },
+            {
+                "sku": "SKU-PRICE-01",
+                "description": "Premium Valve",
+                "quantity": 5,
+                "billed_unit_price": 150.0
+            },
+            {
+                "sku": "SKU-QTY-01",
+                "description": "bulk Cables",
+                "quantity": 100,
+                "billed_unit_price": 1.0
+            }
+        ]
+    }
+]

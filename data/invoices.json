@@ -1,0 +1,64 @@
+[
+    {
+        "invoice_id": "INV-2024-0091",
+        "vendor_name": "Apex Industrial Supply",
+        "date": "2024-05-10",
+        "line_items": [
+            {
+                "sku": "APX-BOLT-M12",
+                "description": "Hex Head Bolt M12 x 50mm (Grade 8.8)",
+                "quantity": 500.0,
+                "billed_unit_price": 0.85
+            },
+            {
+                "sku": "APX-WASHER-M12",
+                "description": "Hardened Washer M12",
+                "quantity": 500.0,
+                "billed_unit_price": 0.22
+            },
+            {
+                "sku": "STAY-CLEAN-1",
+                "description": "Standard Hardware Nut M12",
+                "quantity": 500.0,
+                "billed_unit_price": 0.05
+            }
+        ]
+    },
+    {
+        "invoice_id": "INV-2024-0095",
+        "vendor_name": "Apex Industrial Supply",
+        "date": "2024-05-15",
+        "line_items": [
+            {
+                "sku": "CLEAN-ITEM-1",
+                "description": "Clean Item A",
+                "quantity": 10.0,
+                "billed_unit_price": 100.0
+            },
+            {
+                "sku": "CLEAN-ITEM-2",
+                "description": "Clean Item B",
+                "quantity": 5.0,
+                "billed_unit_price": 50.0
+            },
+            {
+                "sku": "APX-PUMP-CEN3",
+                "description": "Centrifugal Pump 3HP",
+                "quantity": 2.0,
+                "billed_unit_price": 1850.0
+            },
+            {
+                "sku": "APX-SEAL-MECH-3",
+                "description": "Mechanical Seal for 3HP Pump",
+                "quantity": 4.0,
+                "billed_unit_price": 220.0
+            },
+            {
+                "sku": "APX-GHOST-SKU",
+                "description": "Premium Installation Service Package",
+                "quantity": 1.0,
+                "billed_unit_price": 995.0
+            }
+        ]
+    }
+]

@@ -1,14 +1,26 @@
-fastapi
-uvicorn
-neo4j
-python-dotenv
-pydantic
-pydantic-settings
-httpx
-python-multipart
-# Database
-sqlalchemy
-psycopg2-binary
-alembic
-ruff
-google-genai
+# ── LLM & Intelligence ──────────────────────────────────────────────────────────
+google-genai                       # Gemini (latest stable SDK — Replaces legacy google-generativeai)
+Pillow>=10.0.0                     # Image handling for Gemini Vision
+
+# ── API & Orchestration ────────────────────────────────────────────────────────
+fastapi[standard]                  # FastAPI + Uvicorn + Multipart
+pydantic                           # Data validation
+python-jose[cryptography]          # JWT handling
+passlib[bcrypt]                    # Password hashing
+
+# ── Databases & Persistence ────────────────────────────────────────────────────
+psycopg2-binary>=2.9.9             # Postgres driver
+neo4j>=6.1.0                       # Neo4j driver (Stable — Replaces deprecated neo4j-driver)
+sqlalchemy>=2.0.0                  # SQL engine
+pandas>=2.1.0                      # Data structures
+
+# ── Universal Ingestion ────────────────────────────────────────────────────────
+lxml>=6.0.2                        # High-performance XML/HTML (required for exact line hinting)
+openpyxl>=3.1.0                    # .xlsx support
+xlrd>=2.0.1                        # .xls support (legacy)
+pdfplumber>=0.11.0                 # PDF text extraction
+pdf2image>=1.17.0                  # PDF → image (multimodal fallback)
+
+# ── Specialized Logic & Search ──────────────────────────────────────────────────
+rapidfuzz                          # High-performance fuzzy matching (Required for 10k+ rows)
+psutil                             # Performance benchmarking (memory/cpu audit)

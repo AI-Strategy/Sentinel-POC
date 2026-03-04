@@ -1,0 +1,8 @@
+{
+  "dataset": "dataset_05_scale_10k",
+  "summary_counts": {
+    "PRICE_VARIANCE": 50,
+    "QTY_MISMATCH": 30,
+    "PHANTOM_LINE": 20
+  }
+}

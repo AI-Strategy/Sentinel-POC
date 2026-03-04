@@ -1,0 +1,13 @@
+<root>
+  <delivery waybill="WB-88231">
+    <item part_id="APX-BOLT-M12" qty_received="500" condition="GOOD"/>
+    <item part_id="APX-WASHER-M12" qty_received="480" condition="GOOD"/>
+    <item part_id="STAY-CLEAN-1" qty_received="500" condition="GOOD"/>
+  </delivery>
+  <delivery waybill="WB-88301">
+    <item part_id="CLEAN-ITEM-1" qty_received="10" condition="GOOD"/>
+    <item part_id="CLEAN-ITEM-2" qty_received="5" condition="GOOD"/>
+    <item part_id="APX-PUMP-CEN3" qty_received="2" condition="GOOD"/>
+    <item part_id="APX-SEAL-MECH-3" qty_received="3" condition="DAMAGED_1"/>
+  </delivery>
+</root>

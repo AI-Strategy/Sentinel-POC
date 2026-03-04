@@ -1,0 +1,20 @@
+{
+    "leaks": [
+        {
+            "type": "Price Variance",
+            "evidence": "Invoice INV-1001 billed at 25.5, PO contracted at 25.0.",
+            "recoverable": 25.0
+        },
+        {
+            "type": "Quantity Mismatch",
+            "evidence": "Invoice INV-1001 billed for 50.0, but only 48.0 received at dock.",
+            "recoverable": 50.0
+        },
+        {
+            "type": "Phantom Line",
+            "evidence": "Invoice INV-1002 contains item PHANTOM-X with no corresponding PO or POD.",
+            "recoverable": 1500.0
+        }
+    ],
+    "total_recoverable_amount": 1575.0
+}

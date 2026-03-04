@@ -1,0 +1,184 @@
+{
+  "report_meta": {
+    "title": "Sentinel Ghost Invoice Reconciliation Report",
+    "generated_at": "2026-03-04T18:45:23.913170+00:00",
+    "total_invoice_lines": 8,
+    "total_flags": 6,
+    "total_financial_exposure_usd": 1509.4,
+    "flags_by_type": {
+      "PRICE_VARIANCE": 3,
+      "QTY_MISMATCH": 2,
+      "PHANTOM_LINE": 1
+    }
+  },
+  "flags": [
+    {
+      "flag_id": "PHANTOM_LINE::INV-2024-0095::APX-GHOST-SKU",
+      "ghost_type": "PHANTOM_LINE",
+      "severity": "HIGH",
+      "invoice_id": "INV-2024-0095",
+      "sku": "APX-GHOST-SKU",
+      "description": "Premium Installation Service Package",
+      "invoiced_value": 995.0,
+      "expected_value": 0.0,
+      "delta": 0.0,
+      "financial_impact_usd": 995.0,
+      "narrative": "SKU 'APX-GHOST-SKU' (Premium Installation Service Package) appears on invoice INV-2024-0095 but has NO matching Purchase Order and NO Proof of Delivery. Full billed amount $995.00 is unsubstantiated.",
+      "evidence_chain": [
+        {
+          "file": "invoices.json",
+          "field": "sku",
+          "record_index": 104,
+          "line_number": -1
+        },
+        {
+          "file": "invoices.json",
+          "field": "billed_unit_price",
+          "record_index": 104,
+          "line_number": -1
+        },
+        {
+          "file": "invoices.json",
+          "field": "quantity",
+          "record_index": 104,
+          "line_number": -1
+        }
+      ]
+    },
+    {
+      "flag_id": "QTY_MISMATCH::INV-2024-0095::APX-SEAL-MECH-3",
+      "ghost_type": "QTY_MISMATCH",
+      "severity": "MEDIUM",
+      "invoice_id": "INV-2024-0095",
+      "sku": "APX-SEAL-MECH-3",
+      "description": "Mechanical Seal for 3HP Pump",
+      "invoiced_value": 4.0,
+      "expected_value": 3.0,
+      "delta": 1.0,
+      "financial_impact_usd": 220.0,
+      "narrative": "SKU 'APX-SEAL-MECH-3': invoiced for 4.0 units but only 3.0 units logged at dock (waybill WB-88301). Delta of +1.0 units @ $220.0 = $+220.00 exposure. Condition flag: DAMAGED_1.",
+      "evidence_chain": [
+        {
+          "file": "invoices.json",
+          "field": "quantity",
+          "record_index": 103,
+          "line_number": -1
+        },
+        {
+          "file": "proof_of_delivery.xml",
+          "field": "qty_received_at_dock",
+          "record_index": 6,
+          "line_number": 11
+        }
+      ]
+    },
+    {
+      "flag_id": "PRICE_VARIANCE::INV-2024-0095::APX-PUMP-CEN3",
+      "ghost_type": "PRICE_VARIANCE",
+      "severity": "MEDIUM",
+      "invoice_id": "INV-2024-0095",
+      "sku": "APX-PUMP-CEN3",
+      "description": "Centrifugal Pump 3HP",
+      "invoiced_value": 1850.0,
+      "expected_value": 1750.0,
+      "delta": 100.0,
+      "financial_impact_usd": 200.0,
+      "narrative": "SKU 'APX-PUMP-CEN3': invoiced at $1850.0000/unit vs PO contracted price $1750.0000/unit (5.7% variance). Over 2.0 units, over-billing = $+200.00.",
+      "evidence_chain": [
+        {
+          "file": "invoices.json",
+          "field": "billed_unit_price",
+          "record_index": 102,
+          "line_number": -1
+        },
+        {
+          "file": "purchase_orders.csv",
+          "field": "agreed_unit_price",
+          "record_index": 5,
+          "line_number": 7
+        }
+      ]
+    },
+    {
+      "flag_id": "PRICE_VARIANCE::INV-2024-0091::APX-BOLT-M12",
+      "ghost_type": "PRICE_VARIANCE",
+      "severity": "HIGH",
+      "invoice_id": "INV-2024-0091",
+      "sku": "APX-BOLT-M12",
+      "description": "Hex Head Bolt M12 x 50mm (Grade 8.8)",
+      "invoiced_value": 0.85,
+      "expected_value": 0.75,
+      "delta": 0.1,
+      "financial_impact_usd": 50.0,
+      "narrative": "SKU 'APX-BOLT-M12': invoiced at $0.8500/unit vs PO contracted price $0.7500/unit (13.3% variance). Over 500.0 units, over-billing = $+50.00.",
+      "evidence_chain": [
+        {
+          "file": "invoices.json",
+          "field": "billed_unit_price",
+          "record_index": 0,
+          "line_number": -1
+        },
+        {
+          "file": "purchase_orders.csv",
+          "field": "agreed_unit_price",
+          "record_index": 0,
+          "line_number": 2
+        }
+      ]
+    },
+    {
+      "flag_id": "PRICE_VARIANCE::INV-2024-0095::APX-SEAL-MECH-3",
+      "ghost_type": "PRICE_VARIANCE",
+      "severity": "MEDIUM",
+      "invoice_id": "INV-2024-0095",
+      "sku": "APX-SEAL-MECH-3",
+      "description": "Mechanical Seal for 3HP Pump",
+      "invoiced_value": 220.0,
+      "expected_value": 210.0,
+      "delta": 10.0,
+      "financial_impact_usd": 40.0,
+      "narrative": "SKU 'APX-SEAL-MECH-3': invoiced at $220.0000/unit vs PO contracted price $210.0000/unit (4.8% variance). Over 4.0 units, over-billing = $+40.00.",
+      "evidence_chain": [
+        {
+          "file": "invoices.json",
+          "field": "billed_unit_price",
+          "record_index": 103,
+          "line_number": -1
+        },
+        {
+          "file": "purchase_orders.csv",
+          "field": "agreed_unit_price",
+          "record_index": 6,
+          "line_number": 8
+        }
+      ]
+    },
+    {
+      "flag_id": "QTY_MISMATCH::INV-2024-0091::APX-WASHER-M12",
+      "ghost_type": "QTY_MISMATCH",
+      "severity": "LOW",
+      "invoice_id": "INV-2024-0091",
+      "sku": "APX-WASHER-M12",
+      "description": "Hardened Washer M12",
+      "invoiced_value": 500.0,
+      "expected_value": 480.0,
+      "delta": 20.0,
+      "financial_impact_usd": 4.4,
+      "narrative": "SKU 'APX-WASHER-M12': invoiced for 500.0 units but only 480.0 units logged at dock (waybill WB-88231). Delta of +20.0 units @ $0.22 = $+4.40 exposure.",
+      "evidence_chain": [
+        {
+          "file": "invoices.json",
+          "field": "quantity",
+          "record_index": 1,
+          "line_number": -1
+        },
+        {
+          "file": "proof_of_delivery.xml",
+          "field": "qty_received_at_dock",
+          "record_index": 1,
+          "line_number": 4
+        }
+      ]
+    }
+  ]
+}

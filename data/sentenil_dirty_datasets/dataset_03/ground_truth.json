@@ -1,0 +1,20 @@
+{
+  "dataset": "dataset_03",
+  "expected_flags": [
+    {
+      "sku": "SCAFFOLD-SKU-01",
+      "type": "PRICE_VARIANCE",
+      "impact": 100.0,
+      "evidence": [
+        {
+          "file": "invoices.json",
+          "line": 10
+        },
+        {
+          "file": "purchase_orders.csv",
+          "line": 2
+        }
+      ]
+    }
+  ]
+}

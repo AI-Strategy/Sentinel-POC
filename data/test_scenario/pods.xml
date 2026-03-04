@@ -1,0 +1,7 @@
+<Deliveries>
+  <delivery waybill_ref="WB-TEST-01">
+    <item part_id="SKU-GOOD-01" qty_received_at_dock="10" condition="PERFECT"/>
+    <item part_id="SKU-PRICE-01" qty_received_at_dock="5" condition="GOOD"/>
+    <item part_id="SKU-QTY-01" qty_received_at_dock="80" condition="DAMAGED"/>
+  </delivery>
+</Deliveries>
